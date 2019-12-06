@@ -1,0 +1,18 @@
+Campos de resumen
+-------------------------------------------
+Nombre de requermiento xxx
+Tipo de requerimiento
+Pilar Estrategico
+Fecha de Solicitud
+Solicitado Por
+Estado
+Requerimiento TFS
+
+------------------------------------------------
+
+Hacer Guia de registros
+Diagrama de proceso de GDD
+Montar info de matricez de priorizacion e impacto
+
+
+Solicitar usuario a cada Gestor de requerimiento.

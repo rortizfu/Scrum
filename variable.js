@@ -162,7 +162,15 @@ const addComponent = (content) => {
 
     divCampo.appendChild(fieldDescription);
 
-    
+    const hr = document.createElement("hr");
+    divCampo.appendChild(hr);
+
+    const sp = document.createElement("span");
+    sp.innerText = "Variables"    
+    divCampo.appendChild(sp);
+
+    const divVariable = document.createElement("div");
+    //divVariable.classList.add("form-control");
 
     for (var i = 1; i <= content.ComponentCantVarText; i++) {
         const divCampoText = document.createElement("div");
@@ -171,7 +179,7 @@ const addComponent = (content) => {
 
         const label = document.createElement("label");
         label.setAttribute("for", "labelField");
-        label.innerText = "Variable " + i.toString();
+        label.innerText = "Variable Texto " + i.toString();
 
         const fieldVariable = document.createElement("input");
         fieldVariable.type = "text";
@@ -184,29 +192,38 @@ const addComponent = (content) => {
         divCampoText.appendChild(label);
         divCampoText.appendChild(fieldVariable);
 
-        divCampo.appendChild(divCampoText);
+        divVariable.appendChild(divCampoText);
     }
 
     
     //---------------------------------------------------------------------
     
     for (var i = 1; i <= content.ComponentCantVarImage; i++) {
-        const divCampoImage = document.createElement("div");    
+        const div = document.createElement("div");
+        const label = document.createElement("label");
+        label.setAttribute("for", "labelField");
+        label.innerText = "Variable Imagen " + i.toString();
+
+        div.appendChild(label);
+
+        div.classList.add("form-group");
+
+        const divCampoImage = document.createElement("div");           
+
         const inputValorVariable = document.createElement("input");
         inputValorVariable.id = "inputValorVariable";
         inputValorVariable.classList.add("form-control");
-        //inputValorVariable.value = variable.VariableValor;
+        inputValorVariable.name = "variableImage" + i.toString();
         inputValorVariable.type = "text";
         inputValorVariable.required = "required";
         inputValorVariable.maxLength = 1000;
-        //inputValorVariable.disabled = variable.typeVariable.TypeVariableDescription === "Imagen";
+        
         inputValorVariable.disabled = true;
 
         divCampoImage.classList.add("input-group");
         divCampoImage.classList.add("input-file");
 
-        inputValorVariable.placeholder = "Seleccione el archivo...";
-        //inputValorVariable.value = variable.VariableValor.split("/")[variable.VariableValor.split("/").length - 1];
+        inputValorVariable.placeholder = "Seleccione el archivo...";        
 
         const btnFile = document.createElement("button");
         btnFile.id = "btnFile";
@@ -226,13 +243,15 @@ const addComponent = (content) => {
         divCampoImage.appendChild(span);
 
         divCampoImage.appendChild(inputValorVariable);
-        
-        
-        divCampo.appendChild(divCampoImage);
+
+        div.appendChild(divCampoImage)
+
+        divVariable.appendChild(div);
     }
 
-    
 
+
+    divCampo.appendChild(divVariable);
     body.appendChild(divCampo);
 
 
@@ -253,27 +272,66 @@ const addComponent = (content) => {
     btnAceppt.setAttribute("data-dismiss", "modal");
     btnAceppt.onclick = function (e) {
         ModalLoaderShow();
+
+
+        var array = [];
+        for (var i = 0; i <= divVariable.childElementCount - 1; i++) {
+            for (var j = 0; j <= divVariable.children[i].childElementCount - 1; j++) {
+
+                if (((divVariable.children[i]).children[j]).childElementCount > 0) {
+
+                    for (var k = 0; k <= ((divVariable.children[i]).children[j]).childElementCount - 1; k++) {
+                        if (((divVariable.children[i]).children[j]).children[k].tagName === "INPUT") {
+                            var object = {
+                                Name: ((divVariable.children[i]).children[j]).children[k].name,
+                                Value: ((divVariable.children[i]).children[j]).children[k].value
+                            }
+
+                            array.push(object);
+                        }
+                    }
+                }
+
+                else {
+                    if ((divVariable.children[i]).children[j].tagName === "INPUT") {
+                        var object = {
+                            Name: (divVariable.children[i]).children[j].name,
+                            Value: (divVariable.children[i]).children[j].value
+                        }
+
+                        array.push(object);
+                    }
+                }
+
+                
+            }
+        }
+
+
+        content.ListComponent = array;
+
+
         $.ajax({
             dataType: "json",
             type: "POST",
-            url: urlServices + "/Page/GetList/",
+            url: urlServices + "/content/AddComponent/",
             contentType: "application/json; charset=utf-8",
-            data: {},
+            data: JSON.stringify(content),
             success: function OnSuccess(response) {
-                if (response[0].Result.length > 0) {
-                    $("#selPage").append("<option value=0>Seleccione...</option>");
-                    $.each(response[0].Result, function (key, value) {
-                        $("#selPage").append("<option value=" + value.PageId + ">" + value.PageName + "</option>");
-                    });
+                ModalLoaderHidden();
+                if (response[0].State) {
+                    alert("Contenido actualizado correctamente.");
+
+                    clsContent();
+                    getContent($("#selPage").val());
                 }
                 else {
-                    alert("No es posible obtener la lista, por favor intente de nuevo.");
+                    alert("No es posible actualizar el contenido, por favor intente de nuevo.");
                 }
-                ModalLoaderHidden();
             },
             failure: function OnError(error) {
                 ModalLoaderHidden();
-                alert("No es posible obtener la lista, por favor intente de nuevo.");
+                alert("No es posible actualizar el contenido, por favor intente de nuevo.");
             }
         });
     };
